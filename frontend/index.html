@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Inventory</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const WEB_APP_URL = 'REPLACE_WITH_WEB_APP_URL';
+
+      function App() {
+        const [items, setItems] = React.useState([]);
+        const [name, setName] = React.useState('');
+        const [qty, setQty] = React.useState('');
+
+        React.useEffect(() => {
+          fetch(WEB_APP_URL)
+            .then(res => res.json())
+            .then(setItems);
+        }, []);
+
+        function addItem(e) {
+          e.preventDefault();
+          fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({ values: [name, qty] }),
+            headers: { 'Content-Type': 'application/json' }
+          }).then(() => {
+            setItems([...items, [name, qty]]);
+            setName('');
+            setQty('');
+          });
+        }
+
+        return (
+          <div>
+            <h1>Inventory</h1>
+            <ul>
+              {items.slice(1).map((row, i) => (
+                <li key={i}>{row[0]} ({row[1]})</li>
+              ))}
+            </ul>
+            <form onSubmit={addItem}>
+              <input value={name} onChange={e => setName(e.target.value)} placeholder="Item" />
+              <input value={qty} onChange={e => setQty(e.target.value)} placeholder="Qty" />
+              <button type="submit">Add</button>
+            </form>
+          </div>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+  </body>
+</html>
